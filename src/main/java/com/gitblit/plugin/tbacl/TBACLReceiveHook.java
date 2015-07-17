@@ -104,13 +104,15 @@ public class TBACLReceiveHook extends ReceiveHook {
 					team = branch;
 				}
 
-				// enforce user is member of team named for a branch
-				if (!user.isTeamMember(team)) {
-					log.debug(reject);
-					cmd.setResult(Result.REJECTED_OTHER_REASON, reject);
-				} else {
-					log.info("{}: permitting push from '{}' to branch '{}'", name, user.username, branch);
-				}
+				// enforce user is member of team whose name is at the start of a branch
+				for (com.gitblit.models.TeamModel myteam : user.teams){
+					if(team.startsWith(myteam.name)){
+						log.info("{}: permitting push from '{}' to branch '{}'", name, user.username, branch);
+						return;
+					}
+				}				
+				log.debug(reject);
+				cmd.setResult(Result.REJECTED_OTHER_REASON, reject);
 			} else {
 				// pushing something else
 				cmd.setResult(Result.REJECTED_OTHER_REASON, reject);
